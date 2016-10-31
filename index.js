@@ -6,6 +6,12 @@ function resolveOrigin(url) {
   return a.origin || `${a.protocol}//${a.hostname}`
 }
 
+function resolveValue(model, property) {
+  const unwrappedContext = typeof model[property] === 'function'
+    ? model[property]() : model[property];
+  return Promise.resolve(unwrappedContext);
+}
+
 function distrust(e, origin) {
   return e.origin !== origin
 }
@@ -31,6 +37,33 @@ class ParentAPI {
     this.parent.addEventListener(MESSAGE, this.listener, false)
   }
 
+  /**
+   * get iframe model property
+   * @param property
+   * @returns {Promise}
+   */
+  get(property) {
+    return new Promise((resolve, reject) => {
+      const transact = e => {
+        if (e.data.type === 'reply') {
+          this.parent.removeEventListener(MESSAGE, transact, false);
+          resolve(e.data.value);
+        }
+      }
+      this.parent.addEventListener(MESSAGE, transact, false)
+
+      this.child.postMessage({
+        type: 'request',
+        property
+      }, this.childOrigin)
+    })
+  }
+
+  /**
+   * invoke iframe model function property
+   * @param property
+   * @param data
+   */
   call(property, data) {
     this.child.postMessage({
       type: 'call',
@@ -39,10 +72,18 @@ class ParentAPI {
     }, this.childOrigin)
   }
 
+  /**
+   * add iframe event handle
+   * @param name
+   * @param callback
+   */
   on(name, callback) {
     this.events[name] = callback
   }
 
+  /**
+   * destroy iframe
+   */
   destroy() {
     this.parent.removeEventListener(MESSAGE, this.listener, false)
     this.frame.parentNode.removeChild(this.frame)
@@ -58,11 +99,24 @@ class ChildAPI {
       if (distrust(e, this.parentOrigin)) return
 
       if (e.data.type === 'call') {
-        this.model[property].call(this, data)
+        if (property in this.model && typeof this.model[property] === 'function')
+          this.model[property].call(this, data)
+      } else if (e.data.type === 'request') {
+        resolveValue(this.model, e.data.prototype).then(value => {
+          e.source.postMessage({
+            type: 'reply',
+            value
+          }, e.origin)
+        })
       }
     }, false)
   }
 
+  /**
+   * iframe emit event and data to parent
+   * @param name
+   * @param data
+   */
   emit(name, data) {
     this.parent.postMessage({
       type: 'emit',
@@ -72,9 +126,15 @@ class ChildAPI {
 }
 
 class Client {
-  constructor() {
+  /**
+   *
+   * @param model iframe model
+   * @returns {*}
+   */
+  constructor(model) {
     this.child = window
     this.parent = this.child.parent
+    this.model = model
     return this.sendHandshakeReply()
   }
 
@@ -89,6 +149,8 @@ class Client {
             type: 'handshake-reply',
           }, e.origin)
 
+          Object.assign(this.model, e.data.model)
+
           resolve(new ChildAPI(this))
         } else
           reject('Handshake reply failed.')
@@ -100,6 +162,14 @@ class Client {
 }
 
 class Postbox {
+  /**
+   *
+   * @param options
+   * @param options.container element to inject iframe into
+   * @param options.url iframe's url
+   * @param options.model model send to iframe
+   * @returns {*}
+   */
   constructor(options) {
     const {container, url, model} = options
 
@@ -117,6 +187,7 @@ class Postbox {
     return new Promise((resolve, reject) => {
       const reply = (e) => {
 
+        // receive handshake reply from iframe
         if (e.data.type === 'handshake-reply') {
           this.parent.removeEventListener(MESSAGE, reply, false)
           this.childOrigin = e.origin
@@ -128,6 +199,7 @@ class Postbox {
 
       this.parent.addEventListener(MESSAGE, reply, false)
 
+      // send handshake to iframe
       const loaded = (e) => {
         this.child.postMessage({
           type: 'handshake',
