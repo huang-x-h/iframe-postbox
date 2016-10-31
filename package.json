@@ -1,0 +1,29 @@
+{
+  "name": "postbox",
+  "version": "0.1.0",
+  "description": "A postmessage library",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/huang-x-h/postbox.git"
+  },
+  "homepage": "https://github.com/huang-x-h/postbox",
+  "keywords": [],
+  "license": "MIT",
+  "author": "huang.xinghui huang.x.hui@gmail.com",
+  "bugs": {
+    "url": "https://github.com/huang-x-h/postbox/issues"
+  },
+  "devDependencies": {
+    "babel-core": "^6.18.0",
+    "babel-loader": "^6.2.7",
+    "babel-preset-es2015": "^6.18.0",
+    "webpack": "^1.13.3"
+  }
+}
