@@ -11,7 +11,9 @@ function resolveOrigin(url) {
 function resolveValue(model, property) {
   const unwrappedContext = typeof model[property] === 'function'
     ? model[property]() : model[property];
-  return Promise.resolve(unwrappedContext);
+  const defer = $.Deferred()
+  defer.resolve(unwrappedContext)
+  return defer.promise();
 }
 
 function messageUID() {
@@ -44,7 +46,7 @@ class ParentAPI {
       }
     }
 
-    this.parent.addEventListener(MESSAGE, this.listener, false)
+    $(this.parent).on(MESSAGE, this.listener)
   }
 
   /**
@@ -53,22 +55,24 @@ class ParentAPI {
    * @returns {Promise}
    */
   get(property) {
-    return new Promise((resolve, reject) => {
-      const uid = messageUID()
-      const transact = e => {
-        if (e.data.type === 'reply' && e.data.uid === uid) {
-          this.parent.removeEventListener(MESSAGE, transact, false);
-          resolve(e.data.value);
-        }
-      }
-      this.parent.addEventListener(MESSAGE, transact, false)
+    const defer = $.Deferred()
 
-      this.child.postMessage({
-        type: 'request',
-        property,
-        uid
-      }, this.childOrigin)
-    })
+    const uid = messageUID()
+    const transact = e => {
+      if (e.data.type === 'reply' && e.data.uid === uid) {
+        $(this.parent).off(MESSAGE, transact)
+        defer.resolve(e.data.value);
+      }
+    }
+    $(this.parent).on(MESSAGE, transact)
+
+    this.child.postMessage({
+      type: 'request',
+      property,
+      uid
+    }, this.childOrigin)
+
+    return defer.promise()
   }
 
   /**
@@ -97,7 +101,7 @@ class ParentAPI {
    * destroy iframe
    */
   destroy() {
-    this.parent.removeEventListener(MESSAGE, this.listener, false)
+    $(this.parent).off(MESSAGE, this.listener)
     this.frame.parentNode.removeChild(this.frame)
   }
 }
@@ -109,7 +113,7 @@ class ChildAPI {
     this.child = info.child
     this.model = info.model
 
-    this.child.addEventListener(MESSAGE, e => {
+    $(this.child).on(MESSAGE, e => {
       if (distrust(e, this.parentOrigin)) return
 
       const {type, property, uid, data} = e.data
@@ -155,25 +159,27 @@ class Client {
   }
 
   sendHandshakeReply() {
-    return new Promise((resolve, reject) => {
-      const shake = (e) => {
-        if (e.data.type === 'handshake') {
-          this.child.removeEventListener(MESSAGE, shake, false)
-          this.parentOrigin = e.origin
+    const defer = $.Deferred()
 
-          e.source.postMessage({
-            type: 'handshake-reply',
-          }, e.origin)
+    const shake = (e) => {
+      if (e.data.type === 'handshake') {
+        $(this.child).off(MESSAGE, shake)
+        this.parentOrigin = e.origin
 
-          Object.assign(this.model, e.data.model)
+        e.source.postMessage({
+          type: 'handshake-reply',
+        }, e.origin)
 
-          resolve(new ChildAPI(this))
-        } else
-          reject('Handshake reply failed.')
-      }
+        Object.assign(this.model, e.data.model)
 
-      this.child.addEventListener(MESSAGE, shake, false)
-    })
+        defer.resolve(new ChildAPI(this))
+      } else
+        defer.reject('Handshake reply failed.')
+    }
+
+    $(this.child).on(MESSAGE, shake)
+
+    return defer.promise()
   }
 }
 
@@ -200,32 +206,33 @@ class Postbox {
 
   sendHandshake(url) {
     const childOrigin = resolveOrigin(url)
-    return new Promise((resolve, reject) => {
-      const reply = (e) => {
+    const defer = $.Deferred()
 
-        // receive handshake reply from iframe
-        if (e.data.type === 'handshake-reply') {
-          this.parent.removeEventListener(MESSAGE, reply, false)
-          this.childOrigin = e.origin
+    const reply = (e) => {
+      // receive handshake reply from iframe
+      if (e.data.type === 'handshake-reply') {
+        $(this.parent).off(MESSAGE, reply)
+        this.childOrigin = e.origin
 
-          resolve(new ParentAPI(this))
-        } else
-          reject('Handshake failed')
-      }
+        defer.resolve(new ParentAPI(this))
+      } else
+        defer.reject('Handshake failed')
+    }
 
-      this.parent.addEventListener(MESSAGE, reply, false)
+    $(this.parent).on(MESSAGE, reply)
 
-      // send handshake to iframe
-      const loaded = (e) => {
-        this.child.postMessage({
-          type: 'handshake',
-          model: this.model
-        }, childOrigin)
-      }
+    // send handshake to iframe
+    const loaded = (e) => {
+      this.child.postMessage({
+        type: 'handshake',
+        model: this.model
+      }, childOrigin)
+    }
 
-      this.frame.onload = loaded
-      this.frame.src = url
-    })
+    this.frame.onload = loaded
+    this.frame.src = url
+
+    return defer.promise()
   }
 }
 

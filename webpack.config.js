@@ -3,12 +3,16 @@
 const webpack = require('webpack')
 
 module.exports = {
-  entry: './index.js',
+  entry: {
+    'postbox': './index.js',
+    'postbox.jquery': './index.jquery.js'
+  },
   output: {
-    filename: 'postbox.js',
+    filename: '[name].js',
     library: 'Postbox',
     libraryTarget: 'umd'
   },
+  externals: ['jquery'],
   module: {
     loaders: [
       {

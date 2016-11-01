@@ -7,13 +7,14 @@
     "build": "webpack"
   },
   "files": [
-    "postbox.js"
+    "postbox.js",
+    "postbox.jquery.js"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/huang-x-h/postbox.git"
+    "url": "git://github.com/huang-x-h/iframe-postbox.git"
   },
-  "homepage": "https://github.com/huang-x-h/postbox",
+  "homepage": "https://github.com/huang-x-h/iframe-postbox",
   "keywords": [
     "postmessage",
     "iframe"
@@ -21,7 +22,7 @@
   "license": "MIT",
   "author": "huang.xinghui huang.x.hui@gmail.com",
   "bugs": {
-    "url": "https://github.com/huang-x-h/postbox/issues"
+    "url": "https://github.com/huang-x-h/iframe-postbox/issues"
   },
   "devDependencies": {
     "babel-core": "^6.18.0",

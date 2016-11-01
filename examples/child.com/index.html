@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>child.com</title>
+</head>
+<body>
+  <button type="button" onclick="emit()">Emit message</button>
+  <script src="http://localhost:8002/postbox.js"></script>
+  <script>
+    var postbox;
+    new Postbox.Client({
+      field: 'get iframe field',
+      field2: function() {
+        return new Promise(function(resolve, reject) {
+          setTimeout(function() {
+            resolve('get iframe field2')
+          })
+        })
+      },
+      foo: function() {
+        alert('call iframe foo method')
+      }
+    }).then(function(parent) {
+      postbox = parent;
+      alert(postbox.model.field)
+    });
+
+    function emit() {
+      postbox.emit('callEvent', 'call parent')
+    }
+  </script>
+</body>
+</html>
