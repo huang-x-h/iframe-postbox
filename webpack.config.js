@@ -5,7 +5,8 @@ const webpack = require('webpack')
 module.exports = {
   entry: './index.js',
   output: {
-    filename: 'postbox.min.js',
+    filename: 'postbox.js',
+    library: 'Postbox',
     libraryTarget: 'umd'
   },
   module: {
@@ -13,11 +14,12 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel?presets[]=es2015'
+        loader: 'babel',
+        query: {
+          presets: ["es2015"],
+          plugins: ["transform-object-assign"]
+        }
       }
     ]
-  },
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin()
-  ]
+  }
 }

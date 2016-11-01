@@ -1,5 +1,6 @@
 const MESSAGE = 'message'
 let _messageId = 0
+const $ = require('jquery')
 
 function resolveOrigin(url) {
   const a = document.createElement('a')

@@ -1,9 +1,17 @@
-# postbox
+# iframe-postbox
 > A postmessage library inspire by [Postmate](https://github.com/dollarshaveclub/postmate)
+
+Use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) method to communication in iframe
 
 ## Install
 
-`<script src="yourpath/postbox.min.js></script>`
+npm install
+
+`$npm i --save iframe-postbox`
+
+browser import
+
+`<script src="node_modules/iframe-postbox/postbox.js></script>`
 
 ## Usage
 
