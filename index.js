@@ -135,8 +135,8 @@ class ChildAPI {
 
   /**
    * iframe emit event and data to parent
-   * @param name
-   * @param data
+   * @param {string} name event name
+   * @param {Object} data transfer data
    */
   emit(name, data) {
     this.parent.postMessage({
@@ -150,7 +150,7 @@ class Client {
   /**
    * iframe communicate component, defined in child frame
    * @param {Object} model iframe model
-   * @returns {Promise} return ParentAPI Promise Object
+   * @returns {Promise} return {@link ChildAPI} Promise Object
    */
   constructor(model) {
     this.child = window
@@ -159,10 +159,6 @@ class Client {
     return this.sendHandshakeReply()
   }
 
-  /**
-   * @private
-   * @return {Promise}
-   */
   sendHandshakeReply() {
     return new Promise((resolve, reject) => {
       const shake = (e) => {
@@ -193,7 +189,7 @@ class Postbox {
    * @param {element} [options.container=document.body] element to inject iframe into
    * @param {string} options.url iframe's url
    * @param {Object} [options.model] model send to iframe
-   * @returns {Promise} return {@link ChildAPI} Promise Object
+   * @returns {Promise} return {@link ParentAPI} Promise Object
    */
   constructor(options) {
     const {container, url, model} = options
@@ -207,11 +203,6 @@ class Postbox {
     return this.sendHandshake(url)
   }
 
-  /**
-   * @private
-   * @param {string} url
-   * @return {Promise}
-   */
   sendHandshake(url) {
     const childOrigin = resolveOrigin(url)
     return new Promise((resolve, reject) => {
@@ -244,6 +235,7 @@ class Postbox {
 }
 
 /**
+ *
  * @type {Client}
  */
 Postbox.Client = Client
