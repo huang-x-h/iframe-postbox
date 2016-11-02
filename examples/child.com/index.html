@@ -6,9 +6,18 @@
 </head>
 <body>
   <button type="button" onclick="emit()">Emit message</button>
+  <div id="consoleDiv"></div>
   <script src="http://localhost:8002/postbox.js"></script>
   <script>
     var postbox;
+
+    function log(message) {
+      var cDiv = document.querySelector('#consoleDiv')
+      var p = document.createElement('p');
+      p.innerText = message;
+      cDiv.appendChild(p)
+    }
+
     new Postbox.Client({
       field: 'get iframe field',
       field2: function() {
@@ -19,11 +28,12 @@
         })
       },
       foo: function() {
-        alert('call iframe foo method')
+        log('call iframe foo method: foo')
       }
     }).then(function(parent) {
+      log('handshake success')
       postbox = parent;
-      alert(postbox.model.field)
+      log('access parent model field:', postbox.model.field)
     });
 
     function emit() {

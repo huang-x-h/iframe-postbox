@@ -23,6 +23,9 @@ function distrust(e, origin) {
   if (!('type' in e.data)) return false
 }
 
+/**
+ * parent frame api
+ */
 class ParentAPI {
   constructor(info) {
     this.parent = info.parent
@@ -48,7 +51,7 @@ class ParentAPI {
 
   /**
    * get iframe model property
-   * @param property
+   * @param {string} property iframe modle field name
    * @returns {Promise}
    */
   get(property) {
@@ -72,8 +75,8 @@ class ParentAPI {
 
   /**
    * invoke iframe model function property
-   * @param property
-   * @param data
+   * @param {string} property iframe model function name
+   * @param {Object} data functoin argument
    */
   call(property, data) {
     this.child.postMessage({
@@ -85,8 +88,8 @@ class ParentAPI {
 
   /**
    * add iframe event handle
-   * @param name
-   * @param callback
+   * @param {string} name iframe emit event name
+   * @param {function} callback event handler function
    */
   on(name, callback) {
     this.events[name] = callback
@@ -101,6 +104,9 @@ class ParentAPI {
   }
 }
 
+/**
+ * child frame api
+ */
 class ChildAPI {
   constructor(info) {
     this.parent = info.parent
@@ -142,9 +148,9 @@ class ChildAPI {
 
 class Client {
   /**
-   *
-   * @param model iframe model
-   * @returns {*}
+   * iframe communicate component, defined in child frame
+   * @param {Object} model iframe model
+   * @returns {Promise} return ParentAPI Promise Object
    */
   constructor(model) {
     this.child = window
@@ -153,6 +159,10 @@ class Client {
     return this.sendHandshakeReply()
   }
 
+  /**
+   * @private
+   * @return {Promise}
+   */
   sendHandshakeReply() {
     return new Promise((resolve, reject) => {
       const shake = (e) => {
@@ -178,12 +188,12 @@ class Client {
 
 class Postbox {
   /**
-   *
-   * @param options
-   * @param options.container element to inject iframe into
-   * @param options.url iframe's url
-   * @param options.model model send to iframe
-   * @returns {*}
+   * iframe communicate component, defined in parent frame
+   * @param {Object} options
+   * @param {element} [options.container=document.body] element to inject iframe into
+   * @param {string} options.url iframe's url
+   * @param {Object} [options.model] model send to iframe
+   * @returns {Promise} return {@link ChildAPI} Promise Object
    */
   constructor(options) {
     const {container, url, model} = options
@@ -197,6 +207,11 @@ class Postbox {
     return this.sendHandshake(url)
   }
 
+  /**
+   * @private
+   * @param {string} url
+   * @return {Promise}
+   */
   sendHandshake(url) {
     const childOrigin = resolveOrigin(url)
     return new Promise((resolve, reject) => {
@@ -228,6 +243,9 @@ class Postbox {
   }
 }
 
+/**
+ * @type {Client}
+ */
 Postbox.Client = Client
 
 module.exports = Postbox

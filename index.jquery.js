@@ -10,10 +10,10 @@ function resolveOrigin(url) {
 
 function resolveValue(model, property) {
   const unwrappedContext = typeof model[property] === 'function'
-    ? model[property]() : model[property];
+    ? model[property]() : model[property]
   const defer = $.Deferred()
   defer.resolve(unwrappedContext)
-  return defer.promise();
+  return defer.promise()
 }
 
 function messageUID() {
@@ -129,7 +129,7 @@ class ChildAPI {
           }, e.origin)
         })
       }
-    }, false)
+    })
   }
 
   /**

@@ -9,9 +9,18 @@
   <button type="button" onclick="getField()">get iframe field</button>
   <button type="button" onclick="callMethod()">call iframe method</button>
   <button type="button" onclick="destroy()">destroy iframe</button>
+  <div id="consoleDiv"></div>
   <script src="http://localhost:8002/postbox.js"></script>
   <script>
     var postbox;
+
+    function log(message) {
+      var cDiv = document.querySelector('#consoleDiv')
+      var p = document.createElement('p');
+      p.innerText = message;
+      cDiv.appendChild(p)
+    }
+
     var handshake = new Postbox(({
       container: document.querySelector('#iframeDiv'),
       url: 'http://localhost:8001',
@@ -19,13 +28,20 @@
         field: 'get parent field'
       }
     })).then(function(child) {
+      log('handshake success')
       postbox = child
-      postbox.on('callEvent', function(data) { alert(data); })
+      postbox.on('callEvent', function(data) {
+        log('receive iframe callEvent:', data)
+      })
     });
 
     function getField() {
-      postbox.get('field').then(function(value) { alert(value); });
-      postbox.get('field2').then(function(value) { alert(value); });
+      postbox.get('field').then(function(value) {
+        log('get iframe model field:', value)
+      });
+      postbox.get('field2').then(function(value) {
+        log('get iframe model field2:', value)
+      });
     }
 
     function callMethod() {

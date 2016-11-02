@@ -7,7 +7,7 @@ Use [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Wind
 
 npm install
 
-`$npm i --save iframe-postbox`
+`$ npm i --save iframe-postbox`
 
 browser import
 
@@ -46,10 +46,9 @@ handshake.emit('some-event', 'Hello world')
 
 ## API
 
-**`Postbox`**
-`new Postbox(options)`
 
-## Broser support
+## Browser support
 
-`postbox.js` support IE9+/Chrome/Safari/Firefox, `Promise` polyfill
-`postbox.jquery.js` supoort IE8+/Chrome/Safari/Firefox, base on `jquery` (use `Deferred` instead of 'Promise')
+`postbox.js` support `IE9+/Chrome/Safari/Firefox`, `Promise` polyfill
+
+`postbox.jquery.js` supoort `IE8+/Chrome/Safari/Firefox`, base on `jquery` (use `Deferred` instead of 'Promise')

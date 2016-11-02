@@ -1,0 +1,16 @@
+{
+  "source": {
+    "include": ["README.md", "package.json", "index.js"]
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "opts": {
+    "destination": "./doc/",
+    "recurse": true,
+    "verbose": true,
+    "encoding": "utf8",
+    "readme": "./README.md",
+    "package": "./package.json"
+  }
+}
