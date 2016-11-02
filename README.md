@@ -46,6 +46,7 @@ handshake.emit('some-event', 'Hello world')
 
 ## API
 
+See https://huang-x-h.github.io/iframe-postbox/api/index.html
 
 ## Browser support
 
